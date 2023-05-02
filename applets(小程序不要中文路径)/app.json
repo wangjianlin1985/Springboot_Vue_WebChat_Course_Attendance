@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/logs/logs",
+    "pages/main/index",
+    "pages/course/index",
+    "pages/mine/index",
+    "pages/register/register"
+  ],
+  "tabBar": {
+    "color": "#6B6B6B",
+    "selectedColor": "#67B0FF",
+    "borderStyle": "white",
+    "backgroundColor": "#f7f7f8",
+    "list": [
+      {
+        "pagePath": "pages/main/index",
+        "text": "首页",
+        "iconPath": "assets/images/home.png",
+        "selectedIconPath": "assets/images/home-act.png"
+      },
+      {
+        "pagePath": "pages/course/index",
+        "text": "我的课程",
+        "iconPath": "assets/images/question.png",
+        "selectedIconPath": "assets/images/question-act.png"
+      },      
+      {
+        "pagePath": "pages/mine/index",
+        "text": "考勤记录",
+        "iconPath": "assets/images/user.png",
+        "selectedIconPath": "assets/images/user-act.png"
+      }
+    ]
+  },
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "Weixin",
+    "navigationBarTextStyle": "black"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

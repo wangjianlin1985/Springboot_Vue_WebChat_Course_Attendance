@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bs.community.mapper.SysClockinMapper">
+    
+    <resultMap type="SysClockin" id="SysClockinResult">
+        <result property="clockinId"    column="clockin_id"    />
+        <result property="arrangeId"    column="arrange_id"    />
+        <result property="courseName"    column="course_name"    />
+        <result property="userId"    column="user_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="nickName"    column="nick_name"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectSysClockinVo">
+        select a.clockin_id, a.arrange_id,b.dept_id,d.course_name,u.nick_name, a.user_id, a.create_by, a.create_time
+        from sys_clockin a
+        left join sys_course_arrange b on b.arrange_id=a.arrange_id
+        left join sys_course d on d.course_id=b.course_id
+        left join sys_user u on u.user_id=a.user_id
+    </sql>
+
+    <select id="selectSysClockinList" parameterType="SysClockin" resultMap="SysClockinResult">
+        <include refid="selectSysClockinVo"/>
+        <where>
+            <if test="courseName != null  and courseName != ''"> and d.course_name like concat('%', #{courseName}, '%')</if>
+            <if test="nickName != null and nickName != ''">
+                AND u.nick_name like concat('%', #{nickName}, '%')
+            </if>
+            <if test="deptId != null">
+                AND b.dept_id =#{deptId}
+            </if>
+        </where>
+    </select>
+
+    <select id="statisticsIndex" resultType="java.util.HashMap">
+        select
+        (SELECT count(1) from sys_user_role where role_id=2) stucnt,
+        (SELECT count(1) from sys_clockin where date(create_time) = curdate()) kqcnt,
+        (SELECT count(1) from sys_clockin where date(create_time) = curdate() GROUP BY user_id) kqrscnt
+    </select>
+
+    <select id="clockinCount" resultType="java.util.HashMap">
+        <![CDATA[
+        SELECT
+        (SELECT count(1) FROM sys_clockin WHERE TO_DAYS(create_time) = TO_DAYS(NOW())) data0,
+        (SELECT count(1) FROM sys_clockin WHERE (TO_DAYS(NOW()) - TO_DAYS(create_time))<= 1) data1,
+        (SELECT count(1) FROM sys_clockin WHERE date_sub(curdate(), INTERVAL 7 DAY) <= date(create_time)) data2,
+        (SELECT count(1) FROM sys_clockin WHERE date_sub(curdate(), INTERVAL 30 DAY) <= date(create_time)) data3,
+        (SELECT count(1) FROM sys_clockin WHERE date_format(create_time, '%Y%m') = date_format(curdate() , '%Y%m')) data4,
+        (SELECT count(1) FROM sys_clockin WHERE period_diff(date_format(now() , '%Y%m') , date_format(create_time, '%Y%m')) =1) data5
+        ]]>
+    </select>
+
+    <select id="clockinByCource" resultType="java.util.HashMap">
+        SELECT
+        c.course_name name,
+        count(1) value
+        from sys_clockin a
+        left join sys_course_arrange b on b.arrange_id=a.arrange_id
+        LEFT JOIN sys_course c on c.course_id=b.course_id
+        GROUP BY c.course_id
+    </select>
+
+    <select id="clockinByDept" resultType="java.util.HashMap">
+        SELECT
+        c.dept_name name,
+        count(1) value,
+        2000 max
+        from sys_clockin a
+        left join sys_user b on b.user_id=a.user_id
+        LEFT JOIN sys_dept c on c.dept_id=b.dept_id
+        GROUP BY c.dept_id
+    </select>
+    
+    <select id="selectSysClockinById" parameterType="Long" resultMap="SysClockinResult">
+        <include refid="selectSysClockinVo"/>
+        where clockin_id = #{clockinId}
+    </select>
+        
+    <insert id="insertSysClockin" parameterType="SysClockin" useGeneratedKeys="true" keyProperty="clockinId">
+        insert into sys_clockin
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="arrangeId != null">arrange_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="arrangeId != null">#{arrangeId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysClockin" parameterType="SysClockin">
+        update sys_clockin
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="arrangeId != null">arrange_id = #{arrangeId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where clockin_id = #{clockinId}
+    </update>
+
+    <delete id="deleteSysClockinById" parameterType="Long">
+        delete from sys_clockin where clockin_id = #{clockinId}
+    </delete>
+
+    <delete id="deleteSysClockinByIds" parameterType="String">
+        delete from sys_clockin where clockin_id in 
+        <foreach item="clockinId" collection="array" open="(" separator="," close=")">
+            #{clockinId}
+        </foreach>
+    </delete>
+</mapper>

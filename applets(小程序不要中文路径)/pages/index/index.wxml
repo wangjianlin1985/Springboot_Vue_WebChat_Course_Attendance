@@ -1,0 +1,43 @@
+<!--index.wxml-->
+<view class="container">
+  <view class="userinfo">
+    <block wx:if="{{canIUseOpenData}}" calss="userinfo-opendata">
+      <view class="userinfo-avatar">
+        <open-data type="userAvatarUrl"></open-data>
+      </view>
+      <open-data type="userNickName"></open-data>
+    </block>
+    <block wx:elif="{{!hasUserInfo}}">
+      <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile"> 获取头像昵称 </button>
+      <button wx:elif="{{canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
+      <view wx:else> 请使用1.4.4及以上版本基础库 </view>
+    </block>
+    <block wx:else>
+      <image  class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+    </block>
+  </view>
+  <view class="usermotto">
+    <form bindsubmit="onSubmit" bindreset="formReset">
+      <van-cell-group>
+        <van-field
+          value="{{ username }}"
+          name="username"
+          required
+          clearable
+          label="学号"
+          placeholder="请输入学号"
+        />
+        <van-field
+          value="{{ password }}"
+          type="password"
+          name="password"
+          label="密码"
+          placeholder="请输入密码"
+          required
+        />
+      </van-cell-group>
+      <button formType="submit" style="margin-top: 30rpx;background: #1989fa;color: #fff;" >立即登录</button>
+    </form>
+  </view>
+</view>

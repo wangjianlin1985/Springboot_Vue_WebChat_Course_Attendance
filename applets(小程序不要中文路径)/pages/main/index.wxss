@@ -1,0 +1,23 @@
+/* pages/main/index.wxss */
+.van-panel{
+  margin: 20rpx;
+}
+.dkview{
+  position: absolute;
+  right: 20rpx;
+  top: -120rpx;
+  z-index: 9999;
+  
+}
+
+.dkbtn .van-button{
+  width: 100rpx;   
+}
+.courseInfo{
+  padding: 30rpx;
+  font-size: 30rpx;
+}
+.van-cell__value {
+  font-size: 30rpx;
+  text-align: right;
+}

@@ -1,0 +1,13 @@
+
+<van-panel wx:for="{{dataList}}" wx:key title="{{item.courseName}}" use-footer-slot >
+  <view  class="courseInfo">
+    <view>开课老师：{{item.teacher}}</view>
+    <view>开课时间：{{item.beginTime}}-{{item.endTime}}</view>
+    <view>开课地点：{{item.address}}</view>
+  </view>  
+  <view slot="footer" class="dkview">
+      <van-button wx:if="{{item.dk==1}}" size="small" type="default" class="dkbtn">已打卡</van-button>
+      <van-button wx:if="{{item.dk==0}}" size="small" type="info" class="dkbtn" bindtap="dkclick" data-value="{{item.arrangeId}}">打卡</van-button>
+    </view>
+  </van-panel>
+

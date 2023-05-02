@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bs.community.mapper.SysCourseMapper">
+    
+    <resultMap type="SysCourse" id="SysCourseResult">
+        <result property="courseId"    column="course_id"    />
+        <result property="courseName"    column="course_name"    />
+        <result property="credit"    column="credit"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectSysCourseVo">
+        select course_id, course_name, credit, create_by, create_time, remark from sys_course
+    </sql>
+
+    <select id="selectSysCourseList" parameterType="SysCourse" resultMap="SysCourseResult">
+        <include refid="selectSysCourseVo"/>
+        <where>  
+            <if test="courseName != null  and courseName != ''"> and course_name like concat('%', #{courseName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectSysCourseById" parameterType="Long" resultMap="SysCourseResult">
+        <include refid="selectSysCourseVo"/>
+        where course_id = #{courseId}
+    </select>
+        
+    <insert id="insertSysCourse" parameterType="SysCourse" useGeneratedKeys="true" keyProperty="courseId">
+        insert into sys_course
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="courseName != null and courseName != ''">course_name,</if>
+            <if test="credit != null">credit,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="courseName != null and courseName != ''">#{courseName},</if>
+            <if test="credit != null">#{credit},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysCourse" parameterType="SysCourse">
+        update sys_course
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="courseName != null and courseName != ''">course_name = #{courseName},</if>
+            <if test="credit != null">credit = #{credit},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where course_id = #{courseId}
+    </update>
+
+    <delete id="deleteSysCourseById" parameterType="Long">
+        delete from sys_course where course_id = #{courseId}
+    </delete>
+
+    <delete id="deleteSysCourseByIds" parameterType="String">
+        delete from sys_course where course_id in 
+        <foreach item="courseId" collection="array" open="(" separator="," close=")">
+            #{courseId}
+        </foreach>
+    </delete>
+</mapper>

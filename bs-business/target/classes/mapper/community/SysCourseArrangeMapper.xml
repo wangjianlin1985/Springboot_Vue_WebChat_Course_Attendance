@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bs.community.mapper.SysCourseArrangeMapper">
+    
+    <resultMap type="SysCourseArrange" id="SysCourseArrangeResult">
+        <result property="arrangeId"    column="arrange_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="courseId"    column="course_id"    />
+        <result property="courseName"    column="course_name"    />
+        <result property="courseDate"    column="course_date"    />
+        <result property="beginTime"    column="begin_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="address"    column="address"    />
+        <result property="teacher"    column="teacher"    />
+        <result property="credit"    column="credit"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="minute"    column="minute"    />
+        <result property="remark"    column="remark"    />
+        <result property="dk"    column="dk"    />
+
+    </resultMap>
+
+    <sql id="selectSysCourseArrangeVo">
+        select
+            c.arrange_id, c.dept_id, c.course_id, d.course_name,d.credit, c.course_date,
+            c.begin_time, c.end_time, c.address, c.teacher, c.create_by, c.create_time, c.remark
+            from sys_course_arrange c
+            left join sys_course d on d.course_id=c.course_id
+    </sql>
+
+    <select id="selectSysCourseArrangeList" parameterType="SysCourseArrange" resultMap="SysCourseArrangeResult">
+        <include refid="selectSysCourseArrangeVo"/>
+        <where>  
+            <if test="deptId != null "> and c.dept_id = #{deptId}</if>
+            <if test="courseId != null "> and c.course_id = #{courseId}</if>
+            <if test="courseName != null  and courseName != ''"> and d.course_name like concat('%', #{courseName}, '%')</if>
+            <if test="courseDate != null "> and c.course_date = #{courseDate}</if>
+            <if test="beginTime != null  and beginTime != ''"> and c.begin_time = #{beginTime}</if>
+            <if test="endTime != null  and endTime != ''"> and c.end_time = #{endTime}</if>
+            <if test="address != null  and address != ''"> and c.address = #{address}</if>
+            <if test="teacher != null  and teacher != ''"> and c.teacher = #{teacher}</if>
+        </where>
+    </select>
+
+
+    <select id="selectTodayCourseArrangeList" parameterType="SysCourseArrange" resultMap="SysCourseArrangeResult">
+        select
+        c.arrange_id,
+        c.dept_id,
+        c.course_id,
+        d.course_name,
+        c.course_date,
+        c.begin_time,
+        c.end_time,
+        c.address,
+        c.teacher,
+        c.create_by,
+        c.create_time,
+        c.remark,
+        (case when (select count(1) from sys_clockin t where t.user_id=#{userId} and t.arrange_id=c.arrange_id and TO_DAYS(create_time) = TO_DAYS(NOW()))>0 then 1 else 0 end) dk
+        FROM
+            sys_course_arrange c
+            LEFT JOIN sys_course d ON d.course_id = c.course_id
+            where c.dept_id=#{deptId}
+    </select>
+
+    <select id="selectClockHistory" parameterType="SysCourseArrange" resultMap="SysCourseArrangeResult">
+        SELECT
+            c.arrange_id,
+            c.dept_id,
+            c.course_id,
+            d.course_name,
+            c.course_date,
+            c.begin_time,
+            c.end_time,
+            c.address,
+            c.teacher,
+            c.create_by,
+            a.create_time,
+            ROUND((UNIX_TIMESTAMP(a.create_time)-UNIX_TIMESTAMP(c.course_date))/60) as minute,
+            c.remark
+        FROM
+            sys_clockin a
+            LEFT JOIN sys_course_arrange c ON c.arrange_id = a.arrange_id
+            LEFT JOIN sys_course d ON d.course_id = c.course_id
+        WHERE
+            a.user_id	= #{userId}
+        <if test="courseName != null  and courseName != ''"> and d.course_name like concat('%', #{courseName}, '%')</if>
+    </select>
+    
+    <select id="selectSysCourseArrangeById" parameterType="Long" resultMap="SysCourseArrangeResult">
+        <include refid="selectSysCourseArrangeVo"/>
+        where arrange_id = #{arrangeId}
+    </select>
+        
+    <insert id="insertSysCourseArrange" parameterType="SysCourseArrange" useGeneratedKeys="true" keyProperty="arrangeId">
+        insert into sys_course_arrange
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">dept_id,</if>
+            <if test="courseId != null">course_id,</if>
+            <if test="courseDate != null">course_date,</if>
+            <if test="beginTime != null">begin_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="address != null">address,</if>
+            <if test="teacher != null">teacher,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">#{deptId},</if>
+            <if test="courseId != null">#{courseId},</if>
+            <if test="courseDate != null">#{courseDate},</if>
+            <if test="beginTime != null">#{beginTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="address != null">#{address},</if>
+            <if test="teacher != null">#{teacher},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysCourseArrange" parameterType="SysCourseArrange">
+        update sys_course_arrange
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="courseDate != null">course_date = #{courseDate},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="teacher != null">teacher = #{teacher},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where arrange_id = #{arrangeId}
+    </update>
+
+    <delete id="deleteSysCourseArrangeById" parameterType="Long">
+        delete from sys_course_arrange where arrange_id = #{arrangeId}
+    </delete>
+
+    <delete id="deleteSysCourseArrangeByIds" parameterType="String">
+        delete from sys_course_arrange where arrange_id in 
+        <foreach item="arrangeId" collection="array" open="(" separator="," close=")">
+            #{arrangeId}
+        </foreach>
+    </delete>
+</mapper>
